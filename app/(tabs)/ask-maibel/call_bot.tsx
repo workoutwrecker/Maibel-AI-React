@@ -1,4 +1,4 @@
-export const botResponse = async (userMessage: string, userId: number, onStreamUpdate) => {
+export const botResponse = async (userMessage: string, userId: number, onStreamUpdate?: (chunk: string) => void) => {
   try {
     const response = await fetch('http://127.0.0.1:8000/chat', {
       method: 'POST',
@@ -14,6 +14,10 @@ export const botResponse = async (userMessage: string, userId: number, onStreamU
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Something went wrong');
+    }
+
+    if (!response.body) {
+      throw new Error('Response body is null.');
     }
 
     // Ensure the response is a stream
