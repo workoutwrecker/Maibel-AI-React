@@ -52,7 +52,8 @@ nemo_nvidia_llm = ChatNVIDIA(model="meta/llama-3.1-70b-instruct", api_key=NVIDIA
 pinecone_vs = VectorStoreManager()
 
 async def call_model(state: MessagesState):
-    # user_info = context.user_data.get("user_info", {})
+    print("State: ", state)
+
     trimmed_state = trim_messages(state['messages'], strategy="last", token_counter=len, 
                                   max_tokens=21, start_on="human", end_on=("human"), include_system=False) # Gets context of last 21 messages
     user_input = trimmed_state[-1].content
@@ -66,10 +67,12 @@ async def call_model(state: MessagesState):
     )
     messages = [SystemMessage(content=system_prompt)] + trimmed_state
 
-    # Stream the response in chunks
-    async for chunk in nemo_nvidia_llm.astream(messages):
-        print(chunk.content, end='', flush=True)
-        yield chunk.content
+    try:    
+        response = await nemo_nvidia_llm.ainvoke(messages)
+        return {"messages": response}
+    except Exception as e:
+        raise Exception(f"stream failed: {e}")
+
 
 # Add the function to the workflow
 workflow.add_node("model", call_model)
@@ -88,6 +91,7 @@ async def chat_endpoint(request: Request):
     data = await request.json()
     user_input = data.get("message", "")
     userid = data.get("userid", "")
+    prev_ai_msg = data.get("prevAImsg", "")
     
     # Validate input
     if not user_input:
@@ -96,12 +100,21 @@ async def chat_endpoint(request: Request):
         return JSONResponse(content={"error": "No userid passed"}, status_code=400)
 
     try:
-        messages = {"messages": [HumanMessage(content=user_input)]}
-
         # Stream the model response back to the client
         async def message_stream():
-            async for chunk in call_model(messages):
-                yield chunk
+            config = {"configurable": {"thread_id": 1, "user_id": userid}}
+            if not prev_ai_msg:
+                messages = {"messages": [HumanMessage(content=user_input)]}
+                app.invoke(messages, config=config)
+            else:        
+                messages = {"messages": [AIMessage(content=prev_ai_msg), HumanMessage(content=user_input)]}
+            
+            try:
+                async for msg, metadata in langchainApp.astream(messages, config=config, stream_mode="messages"):
+                    yield msg.content
+                
+            except Exception as e:
+                yield f"Error: {str(e)}"
 
         return StreamingResponse(message_stream(), media_type="text/plain")
 

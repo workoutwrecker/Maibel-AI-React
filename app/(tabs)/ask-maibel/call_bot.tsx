@@ -1,4 +1,4 @@
-export const botResponse = async (userMessage: string, userId: number, onStreamUpdate?: (chunk: string) => void) => {
+export const botResponse = async (userMessage: string, userId: number, prevAImsg: string, onStreamUpdate?: (chunk: string) => void) => {
   try {
     const response = await fetch('http://127.0.0.1:8000/chat', {
       method: 'POST',
@@ -8,6 +8,7 @@ export const botResponse = async (userMessage: string, userId: number, onStreamU
       body: JSON.stringify({
         message: userMessage,
         userid: userId,
+        prevAImsg: prevAImsg
       }),
     });
 

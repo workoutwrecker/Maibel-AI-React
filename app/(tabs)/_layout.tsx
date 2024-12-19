@@ -1,10 +1,12 @@
 import { Tabs } from 'expo-router';
-import { Image } from 'react-native';
+import { Image, Text } from 'react-native';
 import Feather from '@expo/vector-icons/Feather';
-import { useTheme } from '../../context/ThemeContext'; // Import the useTheme hook
+import { useTheme } from '../../context/ThemeContext';
+import { themeStyles } from "../../context/themeStyles";
 
 export default function TabLayout() {
-  const { theme } = useTheme(); // Access the theme context
+  const { theme } = useTheme();
+  const currentTheme = themeStyles[theme];
 
   return (
     <Tabs
@@ -22,25 +24,108 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Stories',
-          tabBarIcon: ({ color }) => {
-            const { theme } = useTheme(); // Get current theme
-            const iconColor = theme === 'dark' ? 'white' : 'black'; // Set icon color based on theme
-            
-            return <Feather name="book-open" size={28} color={iconColor} />;
+          headerTitle: 'Stories',
+          tabBarLabel: ({ focused }) =>
+            focused ? (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: theme === 'light' ? 'black' : 'white',
+                  opacity: focused ? 1 : 0,
+                }}
+              >
+                Stories
+              </Text>
+            ) : null, // Only show label when focused
+          tabBarIcon: ({ focused }) => {
+            const { theme } = useTheme();
+            const iconColor = theme === 'light' ? 'black' : 'white';
+            const opacity = focused ? 1 : 0.6;
+
+            return <Feather name="book-open" size={28} color={iconColor} style={{ opacity }} />;
           },
         }}
       />
       <Tabs.Screen
         name="ask-maibel"
         options={{
-          title: 'Ask Maibel',
-          tabBarIcon: ({ color, size }) => (
+          headerTitle: 'Ask Maibel',
+          tabBarLabel: ({ focused }) =>
+            focused ? (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: theme === 'light' ? 'black' : 'white',
+                  opacity: focused ? 1 : 0,
+                }}
+              >
+                Ask Maibel
+              </Text>
+            ) : null, // Only show label when focused
+          tabBarIcon: ({ size, focused }) => (
             <Image
               source={require('../../assets/images/ask-maibel.jpg')}
-              style={{ width: size, height: size }}
+              style={{
+                width: size,
+                height: size,
+                opacity: focused ? 1 : 0.6,
+                borderColor: focused ? (theme === 'light' ? 'royalblue' : 'royalblue') : 'transparent',
+                borderWidth: focused ? 2 : 0,
+                borderRadius: size / 2,
+              }}
             />
           ),
+          
+        }}
+      />
+      <Tabs.Screen
+        name="challenges"
+        options={{
+          headerTitle: "Challeges",
+          tabBarLabel: ({ focused }) =>
+            focused ? (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: theme === 'light' ? 'black' : 'white',
+                  opacity: focused ? 1 : 0,
+                }}
+              >
+                Challenges
+              </Text>
+            ) : null, // Only show label when focused
+            tabBarIcon: ({ focused }) => {
+              const { theme } = useTheme();
+              const iconColor = theme === 'light' ? 'black' : 'white';
+              const opacity = focused ? 1 : 0.6;
+  
+              return <Feather name="crosshair" size={28} color={iconColor} style={{ opacity }} />;
+            },
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          headerShown: false,
+          tabBarLabel: ({ focused }) =>
+            focused ? (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: theme === 'light' ? 'black' : 'white',
+                  opacity: focused ? 1 : 0,
+                }}
+              >
+                Settings
+              </Text>
+            ) : null, // Only show label when focused
+            tabBarIcon: ({ focused }) => {
+              const { theme } = useTheme();
+              const iconColor = theme === 'light' ? 'black' : 'white';
+              const opacity = focused ? 1 : 0.6;
+  
+              return <Feather name="settings" size={28} color={iconColor} style={{ opacity }} />;
+            },
         }}
       />
     </Tabs>

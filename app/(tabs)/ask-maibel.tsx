@@ -12,14 +12,25 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { botResponse } from "./ask-maibel/call_bot";
+import { useTheme } from '../../context/ThemeContext';
+import { themeStyles } from "../../context/themeStyles";
 
 export default function AskMaibel() {
+  const { theme } = useTheme();
+  const currentTheme = themeStyles[theme];
   // *Initialising 'state variables' that are exclusive to react
   const [messages, setMessages] = useState([
     { id: "1", sender: "bot", text: "Hi! How can I assist you today?" },
   ]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+
+  const getPreviousAIMessage = () => {
+    const botMessages = messages.filter((msg) => msg.sender === "bot");
+    return botMessages.length > 0 ? botMessages[botMessages.length - 1] : null;
+  };
+
+  const prevAImsg = getPreviousAIMessage();  
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -29,7 +40,7 @@ export default function AskMaibel() {
     // *Append user message to the messages state variable. Cannot directly push a new row since state variables are immutable
     setMessages((prev) => [...prev, userMessage]);
     setIsStreaming(true);
-    botResponse(input, 123, (chunk) => {
+    botResponse(input, 123, prevAImsg?.text || "", (chunk) => {
       setMessages((prev) => {
         const lastMessage = prev[prev.length - 1];
         if (lastMessage.sender === "bot" && lastMessage.text.startsWith("...")) {
@@ -53,6 +64,54 @@ export default function AskMaibel() {
       handleSend();
     }
   };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: currentTheme.background,
+    },
+    messagesContainer: {
+      padding: 10,
+    },
+    messageBubble: {
+      padding: 10,
+      borderRadius: 10,
+      marginVertical: 5,
+      maxWidth: "80%",
+    },
+    userMessage: {
+      alignSelf: "flex-end",
+      backgroundColor: "#ccc",
+    },
+    botMessage: {
+      alignSelf: "flex-start",
+      backgroundColor: "#eee",
+    },
+    messageText: {
+      fontSize: 16,
+      color: "black",
+    },
+    inputContainer: {
+      flexDirection: "row",
+      padding: 10,
+      borderTopWidth: 1,
+      borderTopColor: "#ddd",
+    },
+    input: {
+      flex: 1,
+      padding: 10,
+      borderWidth: 1,
+      borderColor: currentTheme.border,
+      borderRadius: 5,
+      marginRight: 10,
+      color: currentTheme.text,
+    },
+    sendText: {
+      marginTop: 20,
+      fontSize: 16,
+      color: currentTheme.text,
+    },
+  });
 
   return (
     <KeyboardAvoidingView
@@ -95,49 +154,3 @@ export default function AskMaibel() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  messagesContainer: {
-    padding: 10,
-  },
-  messageBubble: {
-    padding: 10,
-    borderRadius: 10,
-    marginVertical: 5,
-    maxWidth: "80%",
-  },
-  userMessage: {
-    alignSelf: "flex-end",
-    backgroundColor: "#ccc",
-  },
-  botMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: "#eee",
-  },
-  messageText: {
-    fontSize: 16,
-    color: "#000",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#ddd",
-  },
-  input: {
-    flex: 1,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  sendText: {
-    marginTop: 20,
-    fontSize: 16,
-  },
-});
