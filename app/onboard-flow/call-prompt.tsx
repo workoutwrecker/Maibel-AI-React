@@ -8,7 +8,7 @@ export default function CallPrompt() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>Notification or Call UI Here</Text>
-      <Button title="Go to Chat" onPress={() => router.push("/(tabs)/ask-maibel")} />
+      <Button title="Go to Chat" onPress={() => router.push("/(tabs)/chat")} />
     </View>
   );
 }

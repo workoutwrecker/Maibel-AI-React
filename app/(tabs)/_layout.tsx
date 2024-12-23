@@ -47,9 +47,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="ask-maibel"
+        name="chat"
         options={{
-          headerTitle: 'Ask Maibel',
+          headerTitle: 'Chat',
           tabBarLabel: ({ focused }) =>
             focused ? (
               <Text
@@ -59,12 +59,12 @@ export default function TabLayout() {
                   opacity: focused ? 1 : 0,
                 }}
               >
-                Ask Maibel
+                Chat
               </Text>
             ) : null, // Only show label when focused
           tabBarIcon: ({ size, focused }) => (
             <Image
-              source={require('../../assets/images/ask-maibel.jpg')}
+              source={require('../../assets/images/bot-icon.jpg')}
               style={{
                 width: size,
                 height: size,

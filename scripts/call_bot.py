@@ -1,7 +1,5 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse, JSONResponse
-import asyncio
-import os
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_core.messages import HumanMessage, SystemMessage, trim_messages, AIMessage
@@ -10,6 +8,10 @@ from langgraph.graph import START, MessagesState, StateGraph
 from pinecone_vs import VectorStoreManager
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
+import os
+
+from constants import PERSONALITIES
 
 load_dotenv()
 
@@ -51,7 +53,7 @@ nemo_hf_llm = ChatHuggingFace(llm=nemo_llm, disable_streaming=False)
 nemo_nvidia_llm = ChatNVIDIA(model="meta/llama-3.1-70b-instruct", api_key=NVIDIA_API_KEY)
 pinecone_vs = VectorStoreManager()
 
-async def call_model(state: MessagesState):
+async def call_model(state: MessagesState, config):
     print("State: ", state)
 
     trimmed_state = trim_messages(state['messages'], strategy="last", token_counter=len, 
@@ -60,11 +62,12 @@ async def call_model(state: MessagesState):
 
     retrieved_docs = pinecone_vs.retrieve_from_vector_store(user_input, 1)
     retrieved_context = "\n".join([res.page_content for res in retrieved_docs])   
-    system_prompt = (
-        "You are a women's fitness coach named Mabel. You are very bubbly and talk in short bursts."
-        # f"User Information:\n {str(user_info)}"
-        f"You may use the following as contextual information.\n {retrieved_context}"
-    )
+
+    personality = config["configurable"].get("personality")
+    personality_data = PERSONALITIES.get(personality, PERSONALITIES["bubbly_coach"])
+    background = personality_data.get("Background", "")
+    system_prompt = f"{background}\n\nContext:\n{retrieved_context}"
+
     messages = [SystemMessage(content=system_prompt)] + trimmed_state
 
     try:    
@@ -91,7 +94,8 @@ async def chat_endpoint(request: Request):
     data = await request.json()
     user_input = data.get("message", "")
     userid = data.get("userid", "")
-    prev_ai_msg = data.get("prevAImsg", "")
+    personality = data.get("personality", "bubbly_coach")
+    print("Personality: ", personality)
     
     # Validate input
     if not user_input:
@@ -102,12 +106,9 @@ async def chat_endpoint(request: Request):
     try:
         # Stream the model response back to the client
         async def message_stream():
-            config = {"configurable": {"thread_id": 1, "user_id": userid}}
-            if not prev_ai_msg:
-                messages = {"messages": [HumanMessage(content=user_input)]}
-                app.invoke(messages, config=config)
-            else:        
-                messages = {"messages": [AIMessage(content=prev_ai_msg), HumanMessage(content=user_input)]}
+            config = {"configurable": {"thread_id": 1, "user_id": userid, "personality": personality}}
+            
+            messages = {"messages": [HumanMessage(content=user_input)]}
             
             try:
                 async for msg, metadata in langchainApp.astream(messages, config=config, stream_mode="messages"):
