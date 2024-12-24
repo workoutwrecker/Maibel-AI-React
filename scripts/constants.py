@@ -17,7 +17,7 @@ PERSONALITIES = {
         "knows what he's doing but hides it behind a veil of chaos."
     },
     "gooby_goober": {
-        "Name": "Gooby",
+        "Name": "Goober",
         "Short Description": "Clumsy, Well-meaning, Often screws up",
         "Background": "Gooby is a cheerful but hapless helper who desperately wants to be useful. They've attended countless"
         "onlinecourses on everything from cooking to carpentry but somehow always end up getting things hilariously wrong."

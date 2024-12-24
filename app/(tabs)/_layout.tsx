@@ -18,7 +18,13 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           color: theme === 'light' ? 'black' : 'white',
         },
-        
+        headerStyle: {
+          height: 70,
+        },
+        headerTitleStyle: {
+          fontSize: 20,
+          textAlign: 'center',
+        },
       }}
     >
       <Tabs.Screen
@@ -64,7 +70,7 @@ export default function TabLayout() {
             ) : null, // Only show label when focused
           tabBarIcon: ({ size, focused }) => (
             <Image
-              source={require('../../assets/images/bot-icon.jpg')}
+              source={require('../../assets/images/bots/bot-icon.jpg')}
               style={{
                 width: size,
                 height: size,

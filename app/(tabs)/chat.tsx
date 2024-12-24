@@ -16,6 +16,8 @@ import { botResponse } from "./chat/call_bot";
 import { useTheme } from '../../context/ThemeContext';
 import { themeStyles } from "../../context/themeStyles";
 import Sidebar from '../../components/sidebar';
+import AddBotModal from '../../components/AddBotModal';
+
 
 interface Message {
   id: string;
@@ -27,6 +29,7 @@ interface User {
   id: string;
   name: string;
   avatar: any;
+  description?: string;
 }
 
 interface Conversation {
@@ -39,8 +42,8 @@ export default function Chat() {
   const currentTheme = themeStyles[theme];
 
   const [users, setUsers] = useState<User[]>([
-    { id: "bubbly_coach", name: "Maibel", avatar: require('../../assets/images/bot-icon.jpg') },
-    { id: "bad_coach", name: "Stan", avatar: require('../../assets/images/bot-icon.jpg') },
+    { id: "bubbly_coach", name: "Maibel", avatar: require('../../assets/images/bots/bot-icon.jpg') },
+    { id: "bad_coach", name: "Stan", avatar: require('../../assets/images/bots/Stan.jpeg') },
   ]);
 
   const [selectedUserId, setSelectedUserId] = useState("bubbly_coach");
@@ -54,6 +57,14 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  const [isAddBotModalVisible, setIsAddBotModalVisible] = useState(false);
+
+  const availableBots: User[] = [
+    { id: "bubbly_coach", name: "Mabel", avatar: require('../../assets/images/bots/bot-icon.jpg'), description: "Bubbly, Friendly, Talks in short bursts" },
+    { id: "bad_coach", name: "Stan", avatar: require('../../assets/images/bots/Stan.jpeg'), description: "Unhelpful, Unfriendly, Demotivating" },
+    { id: "gooby_goober", name: "Goober", avatar: require('../../assets/images/bots/Goober.jpeg'), description: "Clumsy, Well-meaning, Often screws up" },
+    { id: "grey_wolf", name: "Great Grey Wolf Sif", avatar: require('../../assets/images/bots/Grey Wolf.jpeg'), description: "Wise, Mysterious, Sly" },
+  ];
 
   useEffect(() => {
     // Initialize conversations for all users
@@ -63,6 +74,7 @@ export default function Chat() {
     }));
     setConversations(initialConversations);
   }, []);
+
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -80,10 +92,9 @@ export default function Chat() {
     setIsStreaming(true);
 
     const selectedUser = users.find(user => user.id === selectedUserId);
-    const personality = selectedUser?.id || "bubbly_coach";
-    console.log("Personality: ", personality);
+    const userId = selectedUser?.id || "";
 
-    botResponse(input, 123, personality, (chunk) => {
+    botResponse(input, 123, userId, (chunk) => {
       setConversations(prevConversations => 
         prevConversations.map(conv => {
           if (conv.userId === selectedUserId) {
@@ -128,15 +139,13 @@ export default function Chat() {
   };
 
   const handleAddUser = () => {
-    const newUserId = `user${users.length + 1}`;
-    const newUser: User = {
-      id: newUserId,
-      name: `User ${users.length + 1}`,
-      avatar: require('../../assets/images/default-avatar.jpg'),
-      personality: "neutral",
-    };
-    setUsers([...users, newUser]);
-    setConversations([...conversations, { userId: newUserId, messages: [] }]);
+    setIsAddBotModalVisible(true);
+  };
+
+  const handleSelectBot = (bot: User) => {
+    setUsers([...users, bot]);
+    setConversations([...conversations, { userId: bot.id, messages: [] }]);
+    setIsAddBotModalVisible(false);
   };
 
   const handleDeleteChat = (userId: string) => {
@@ -146,17 +155,21 @@ export default function Chat() {
       [
         {
           text: "Cancel",
-          style: "cancel"
+          style: "cancel",
         },
         {
           text: "OK",
           onPress: () => {
-            setConversations(conversations.filter(conv => conv.userId !== userId));
+            setConversations(prevConversations => prevConversations.filter(conv => conv.userId !== userId));
+            setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+  
             if (selectedUserId === userId) {
-              setSelectedUserId(users[0].id);
+              // Select another user if the current user is deleted
+              const remainingUsers = users.filter(user => user.id !== userId);
+              setSelectedUserId(remainingUsers.length > 0 ? remainingUsers[0].id : "");
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -207,12 +220,19 @@ export default function Chat() {
       borderColor: currentTheme.border,
       borderRadius: 5,
       marginRight: 10,
-      color: currentTheme.text,
     },
     sendText: {
-      marginTop: 20,
+      textAlignVertical: 'top',
       fontSize: 16,
       color: currentTheme.text,
+    },
+    sendButton: {
+      backgroundColor: currentTheme.button,
+      paddingVertical: 10,
+      paddingHorizontal: 15,
+      borderRadius: 5,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
 
@@ -258,11 +278,17 @@ export default function Chat() {
             onKeyPress={handleKeyPress}
             editable={!isStreaming}
           />
-          <TouchableOpacity onPress={handleSend} disabled={isStreaming}>
+          <TouchableOpacity onPress={handleSend} disabled={isStreaming} style={styles.sendButton}>
             <Text style={styles.sendText}>{isStreaming ? "..." : "Send"}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      <AddBotModal
+        isVisible={isAddBotModalVisible}
+        onClose={() => setIsAddBotModalVisible(false)}
+        onSelectBot={handleSelectBot}
+        availableBots={availableBots}
+      />
     </View>
   );
 }

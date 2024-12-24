@@ -6,6 +6,7 @@ const lightTheme = {
     primary: '#4CAF50',
     border: "#ddd",
     placeholder: "#888",
+    button: "#007BFF"
   };
 
   const darkTheme = {
@@ -16,6 +17,7 @@ const lightTheme = {
     primary: '#81C784',
     border: "#333",
     placeholder: "#aaa",
+    button: "#1E3A8A"
   };
   
   export const themeStyles = {

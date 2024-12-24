@@ -66,7 +66,8 @@ async def call_model(state: MessagesState, config):
     personality = config["configurable"].get("personality")
     personality_data = PERSONALITIES.get(personality, PERSONALITIES["bubbly_coach"])
     background = personality_data.get("Background", "")
-    system_prompt = f"{background}\n\nContext:\n{retrieved_context}"
+    system_prompt = f"This is your background: {background}\nUse this as contextual information:\n{retrieved_context}\n"
+    "When communicating with the user, remember to stay in character."
 
     messages = [SystemMessage(content=system_prompt)] + trimmed_state
 
@@ -106,7 +107,7 @@ async def chat_endpoint(request: Request):
     try:
         # Stream the model response back to the client
         async def message_stream():
-            config = {"configurable": {"thread_id": 1, "user_id": userid, "personality": personality}}
+            config = {"configurable": {"thread_id": personality, "user_id": userid, "personality": personality}}
             
             messages = {"messages": [HumanMessage(content=user_input)]}
             
