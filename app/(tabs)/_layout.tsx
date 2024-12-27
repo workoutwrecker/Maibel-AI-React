@@ -3,6 +3,7 @@ import { Image, Text } from 'react-native';
 import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '../../context/ThemeContext';
 import { themeStyles } from "../../context/themeStyles";
+import { StatusBar } from "expo-status-bar";
 
 export default function TabLayout() {
   const { theme } = useTheme();
@@ -11,6 +12,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarActiveTintColor: 'blue',
         tabBarStyle: {
           backgroundColor: theme === 'light' ? 'white' : '#3e3e3e',

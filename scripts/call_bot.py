@@ -48,8 +48,17 @@ nemo_llm = HuggingFaceEndpoint(
     repetition_penalty=1.03,
     streaming=True,
 )
+zephyr_llm = HuggingFaceEndpoint(
+    repo_id="HuggingFaceH4/zephyr-7b-beta",
+    task="text-generation",
+    max_new_tokens=1024,
+    do_sample=False,
+    repetition_penalty=1.03,
+    streaming=True,
+)
 qwen_hf_llm = ChatHuggingFace(llm=qwen_llm, disable_streaming=False)
 nemo_hf_llm = ChatHuggingFace(llm=nemo_llm, disable_streaming=False)
+zephyr_hf_llm = ChatHuggingFace(llm=zephyr_llm, disable_streaming=False)
 nemo_nvidia_llm = ChatNVIDIA(model="meta/llama-3.1-70b-instruct", api_key=NVIDIA_API_KEY)
 pinecone_vs = VectorStoreManager()
 

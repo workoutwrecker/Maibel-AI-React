@@ -2,7 +2,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { View, Text, Image, Button, StyleSheet } from "react-native";
 import { storyData } from "./data";
 import { initOnboardStoryData } from "./onboard_data";
-import { useTheme } from '../../context/ThemeContext'; // Import the useTheme hook
+import { useTheme } from '../../context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
 export default function StoryPage() {
   const { slug } = useLocalSearchParams(); // Get the dynamic slug
@@ -29,6 +30,7 @@ export default function StoryPage() {
 
   return (
     <View style={styles().container}>
+      <StatusBar translucent/>
       {/* Image occupies the top half of the screen and doesn't get cropped */}
       <Image source={story.image} style={styles().image} resizeMode="contain" />
       
