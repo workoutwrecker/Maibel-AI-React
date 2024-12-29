@@ -72,19 +72,13 @@ export default function TabLayout() {
                 Chat
               </Text>
             ) : null, // Only show label when focused
-          tabBarIcon: ({ size, focused }) => (
-            <Image
-              source={require('../../assets/images/bots/bot-icon.jpg')}
-              style={{
-                width: size,
-                height: size,
-                opacity: focused ? 1 : 0.6,
-                borderColor: focused ? (theme === 'light' ? 'royalblue' : 'royalblue') : 'transparent',
-                borderWidth: focused ? 2 : 0,
-                borderRadius: size / 2,
-              }}
-            />
-          ),
+          tabBarIcon: ({ focused }) => {
+            const { theme } = useTheme();
+            const iconColor = theme === 'light' ? 'black' : 'white';
+            const opacity = focused ? 1 : 0.6;
+
+            return <Feather name="message-square" size={28} color={iconColor} style={{ opacity }} />;
+          },
           
         }}
       />

@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 
-export default function StoryLayout() {
+export default function OnboardStoryLayout() {
   return (
     <Stack
       screenOptions={{

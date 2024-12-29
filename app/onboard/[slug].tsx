@@ -1,12 +1,10 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { View, Text, ImageBackground, TouchableOpacity, StyleSheet } from "react-native";
-import { storyData } from "./data";
+import { View, Text, ImageBackground, TouchableOpacity, StyleSheet, StatusBar } from "react-native";
 import { initOnboardStoryData } from "./onboard_data";
 import { useTheme } from '../../context/ThemeContext';
 import { LinearGradient } from "expo-linear-gradient";
-import { StatusBar } from 'expo-status-bar';
 
-export default function StoryPage() {
+export default function onboardStoryPage() {
   const { slug } = useLocalSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
@@ -15,8 +13,6 @@ export default function StoryPage() {
 
   if ((slug as string).startsWith("initOnboard")) {
     story = initOnboardStoryData[slug as keyof typeof initOnboardStoryData];
-  } else {
-    story = storyData[slug as keyof typeof storyData];
   }
 
   if (!story) {
@@ -29,7 +25,7 @@ export default function StoryPage() {
 
   return (
     <ImageBackground source={story.image} style={styles().backgroundImage} resizeMode="cover">
-      <StatusBar translucent style="light" />
+      <StatusBar hidden />
       <View style={styles().buttonContainer}>
         {story.buttons.map((button, index) => (
           <TouchableOpacity
@@ -70,6 +66,7 @@ const styles = () => {
       backgroundColor: theme === 'light' ? 'white' : 'black',
     },
     backgroundImage: {
+      padding: 25,
       flex: 1,
       justifyContent: "flex-end",
     },
@@ -77,7 +74,7 @@ const styles = () => {
       alignItems: "center",
     },
     button: {
-      width: 250,
+      minWidth: 250,
       borderRadius: 25,
       overflow: "hidden",
     },
@@ -88,7 +85,7 @@ const styles = () => {
     },
     buttonText: {
       color: "white",
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: "bold",
     },
     plainButton: {

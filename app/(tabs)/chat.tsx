@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { GiftedChat, IMessage, InputToolbar, Send } from "react-native-gifted-chat";
 import { useTheme } from "../../context/ThemeContext";
 import { themeStyles } from "../../context/themeStyles";
-import { View, StyleSheet, Text, Image, TouchableOpacity, ActivityIndicator, ImageBackground, SafeAreaView } from "react-native";
+import { View, StyleSheet, Text, Image, TouchableOpacity, ActivityIndicator, ImageBackground, SafeAreaView, StatusBar, KeyboardAvoidingView, Keyboard, 
+  Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { botResponse } from "./chat/call_bot";
 import { getFromSecureStorage } from '../../utils/SecureStorage';
-import { StatusBar } from 'expo-status-bar';
 
 export default function Chat() {
   const getCoach = async () => {
@@ -210,10 +210,13 @@ export default function Chat() {
 
   return coachBackground ? (
     <>
-      <StatusBar 
-      translucent
-      backgroundColor="#000" />
+      <StatusBar translucent={true} backgroundColor="#000" />
       <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        // behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} // Adjust this offset if needed
+      >
       <ImageBackground
         source={coachBackground}
         style={[styles.container, { paddingBottom: 0 }]}
@@ -235,7 +238,7 @@ export default function Chat() {
         showUserAvatar={true}
         renderAvatarOnTop={true}
         isTyping={isStreaming}
-        bottomOffset={50}
+        bottomOffset={0}
         renderActions={() => (
           <TouchableOpacity style={styles.iconButton} onPress={handleSendImage}>
             <Ionicons name="image-outline" size={28} />
@@ -262,6 +265,7 @@ export default function Chat() {
         )}
       />
     </ImageBackground>
+    </KeyboardAvoidingView>
     </SafeAreaView>
     </>
   ) : (
