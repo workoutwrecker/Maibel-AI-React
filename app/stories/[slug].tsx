@@ -1,25 +1,24 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { View, Text, Image, Button, StyleSheet } from "react-native";
+import { View, Text, ImageBackground, TouchableOpacity, StyleSheet } from "react-native";
 import { storyData } from "./data";
 import { initOnboardStoryData } from "./onboard_data";
 import { useTheme } from '../../context/ThemeContext';
+import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from 'expo-status-bar';
 
 export default function StoryPage() {
-  const { slug } = useLocalSearchParams(); // Get the dynamic slug
+  const { slug } = useLocalSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
 
   let story;
 
-  // Ensure slug is valid
   if ((slug as string).startsWith("initOnboard")) {
     story = initOnboardStoryData[slug as keyof typeof initOnboardStoryData];
   } else {
     story = storyData[slug as keyof typeof storyData];
   }
 
-  // Handle invalid slug
   if (!story) {
     return (
       <View style={styles().container}>
@@ -29,19 +28,35 @@ export default function StoryPage() {
   }
 
   return (
-    <View style={styles().container}>
-      <StatusBar translucent/>
-      {/* Image occupies the top half of the screen and doesn't get cropped */}
-      <Image source={story.image} style={styles().image} resizeMode="contain" />
-      
-      {/* Text and button content in the bottom half */}
-      <View style={styles().content}>
-        <Text style={styles().text}>{story.text}</Text>
-        {story.button && (
-          <Button title={story.button.label} onPress={() => router.push(story.button.link as any)} />
-        )}
+    <ImageBackground source={story.image} style={styles().backgroundImage} resizeMode="cover">
+      <StatusBar translucent style="light" />
+      <View style={styles().buttonContainer}>
+        {story.buttons.map((button, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles().button,
+              button.style === "plain" && styles().plainButton,
+              { marginBottom: button.marginBottom || 25 },
+            ]}
+            onPress={() => router.push(button.link as any)}
+          >
+            {button.style === "plain" ? (
+              <View style={styles().plainButtonContent}>
+                <Text style={styles().plainButtonText}>{button.label}</Text>
+              </View>
+            ) : (
+              <LinearGradient
+                colors={["#6A0DAD", "#FF69B4"]}
+                style={styles().gradientButton}
+              >
+                <Text style={styles().buttonText}>{button.label}</Text>
+              </LinearGradient>
+            )}
+          </TouchableOpacity>
+        ))}
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
@@ -54,21 +69,45 @@ const styles = () => {
       alignItems: "center",
       backgroundColor: theme === 'light' ? 'white' : 'black',
     },
-    image: {
-      width: "100%",
-      height: "50%",
-    },
-    content: {
+    backgroundImage: {
       flex: 1,
+      justifyContent: "flex-end",
+    },
+    buttonContainer: {
+      alignItems: "center",
+    },
+    button: {
+      width: 250,
+      borderRadius: 25,
+      overflow: "hidden",
+    },
+    gradientButton: {
+      paddingVertical: 15,
       justifyContent: "center",
       alignItems: "center",
-      paddingHorizontal: 20,
+    },
+    buttonText: {
+      color: "white",
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    plainButton: {
+      backgroundColor: "white",
+      borderWidth: 1,
+      borderColor: "#ccc",
+    },
+    plainButtonContent: {
+      paddingVertical: 15,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    plainButtonText: {
+      color: "black",
+      fontSize: 18,
+      fontWeight: "bold",
     },
     text: {
-      fontSize: 18,
-      textAlign: "center",
-      marginBottom: 20,
-      color: theme === 'light' ? 'black' : 'white',
+      color: theme === "light" ? "black" : "white",
     },
   });
 };

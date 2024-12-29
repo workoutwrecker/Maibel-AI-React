@@ -22,7 +22,7 @@ export default function Onboarding() {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push("../stories/initOnboardStart")}
+            onPress={() => router.push("../stories/initOnboard_1")}
           >
             <LinearGradient
               colors={["#6A0DAD", "#FF69B4"]}

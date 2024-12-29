@@ -33,6 +33,7 @@ export default function TabLayout() {
         name="index"
         options={{
           headerTitle: 'Stories',
+          
           tabBarLabel: ({ focused }) =>
             focused ? (
               <Text
@@ -58,6 +59,7 @@ export default function TabLayout() {
         name="chat"
         options={{
           headerTitle: 'Chat',
+          headerShown: false,
           tabBarLabel: ({ focused }) =>
             focused ? (
               <Text
@@ -107,7 +109,7 @@ export default function TabLayout() {
               const iconColor = theme === 'light' ? 'black' : 'white';
               const opacity = focused ? 1 : 0.6;
   
-              return <Feather name="crosshair" size={28} color={iconColor} style={{ opacity }} />;
+              return <Feather name="user" size={28} color={iconColor} style={{ opacity }} />;
             },
         }}
       />

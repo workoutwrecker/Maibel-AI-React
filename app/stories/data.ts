@@ -1,18 +1,24 @@
 export const storyData = {
     welcome: {
-      image: "https://example.com/image1.jpg",
-      text: "Welcome to the Story!",
-      button: { label: "Start", link: "/stories/intro" },
+      image: require('../../assets/images/onboard/story_onboard_1.jpg'),
+      buttons: [
+        { label: "Read The Letter", link: "/stories/intro", marginBottom: 20, style: "gradient" },
+        // { label: "Skip Intro", link: "/onboard-flow/skip", marginBottom: 30 },
+      ],
     },
     intro: {
-      image: "https://example.com/image2.jpg",
-      text: "This is the introduction.",
-      button: { label: "Next", link: "/stories/part-1" },
+      image: require('../../assets/images/onboard/story_onboard_1.jpg'),
+      buttons: [
+        { label: "Read The Letter", link: "/stories/part-1", marginBottom: 20, style: "gradient" },
+        // { label: "Skip Intro", link: "/onboard-flow/skip", marginBottom: 30 },
+      ],
     },
-    "part-1": {
-      image: "https://example.com/image3.jpg",
-      text: "This is Part 1 of the story.",
-      button: { label: "Continue", link: "/stories/part-2" },
+    "1-1": {
+      image: require('../../assets/images/onboard/story_onboard_1.jpg'),
+      buttons: [
+        { label: "Read The Letter", link: "/stories/part-2", marginBottom: 20, style: "gradient" },
+        // { label: "Skip Intro", link: "/onboard-flow/skip", marginBottom: 30 },
+      ],
     },
   };
   

@@ -1,47 +1,76 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { GiftedChat, IMessage } from "react-native-gifted-chat";
+import { GiftedChat, IMessage, InputToolbar, Send } from "react-native-gifted-chat";
 import { useTheme } from "../../context/ThemeContext";
 import { themeStyles } from "../../context/themeStyles";
-import { View, StyleSheet, Text, Image, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, StyleSheet, Text, Image, TouchableOpacity, ActivityIndicator, ImageBackground, SafeAreaView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { botResponse } from "./chat/call_bot";
-
+import { getFromSecureStorage } from '../../utils/SecureStorage';
+import { StatusBar } from 'expo-status-bar';
 
 export default function Chat() {
+  const getCoach = async () => {
+    const coachId = await getFromSecureStorage('selectedCoachId');
+    return { coachId };
+  };
+  
+  const logCoachDetails = async () => {
+    const coachDetails = await getCoach();
+    console.log("Coach Details: ", coachDetails);
+  };
+  
+  logCoachDetails();
+
   const { theme } = useTheme();
   const currentTheme = themeStyles[theme];
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [coachBackground, setCoachBackground] = useState(null);
+  const [coachName, setCoachName] = useState("");
 
-  const botAvatar = require("../../assets/images/bots/bot-icon.jpg");
-  
+  const botAvatar = require("../../assets/images/Stan.jpeg");
 
   useEffect(() => {
-    // Initial bot message
-    setMessages([
-      {
-        _id: 1,
-        text: "Hi, I am Mabel. How can I assist you today?",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "Mabel",
-          avatar: botAvatar,
-        },
-      },
-    ]);
+    // Get the selected coach and apply the correct background and name
+    const setCoachDetails = async () => {
+      const coachDetails = await getCoach();
+      let background;
+      let name;
+
+      // Define backgrounds and names for different coaches
+      switch (coachDetails.coachId) {
+        case "male_coach":
+          background = require("../../assets/images/chat/chat_male.jpg");
+          name = "Ethain";
+          break;
+        case "female_coach":
+          background = require("../../assets/images/chat/chat_female.jpg");
+          name = "Maibel";
+          break;
+        case "custom_coach":
+          background = require("../../assets/images/onboard/Male_Coach.jpg");
+          name = "Custom Coach";
+          break;
+        default:
+          background = require("../../assets/images/onboard/Male_Coach.jpg");
+          name = "Coach";
+      }
+
+      setCoachBackground(background);
+      setCoachName(name);
+    };
+
+    setCoachDetails();
   }, []);
 
   const handleSend = useCallback((newMessages: IMessage[] = []) => {
     setMessages((previousMessages) => GiftedChat.append(previousMessages, newMessages));
-  
+
     const userMessage = newMessages[0];
     if (userMessage && userMessage.text) {
       setIsStreaming(true);
-  
-      // Bot response logic using the botResponse function from the working script
       botResponse(userMessage.text, 123, 'bubbly_coach', (chunk) => {
         setMessages((prevMessages) => {
           const lastMessage = prevMessages[0];
@@ -59,7 +88,7 @@ export default function Chat() {
                 createdAt: new Date(),
                 user: {
                   _id: 2,
-                  name: "Mabel", // Bot name (could be dynamic based on bot selected)
+                  name: coachName,
                   avatar: botAvatar,
                 },
               },
@@ -76,7 +105,7 @@ export default function Chat() {
               createdAt: new Date(),
               user: {
                 _id: 2,
-                name: "Mabel", // Bot name (could be dynamic based on bot selected)
+                name: coachName,
                 avatar: botAvatar,
               },
             },
@@ -87,7 +116,7 @@ export default function Chat() {
         setIsStreaming(false);
       });
     }
-  }, []);
+  }, [coachName]);
 
   const handleSendImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -112,13 +141,14 @@ export default function Chat() {
         image: pickerResult.assets[0].uri,
       };
       setMessages((previousMessages) => GiftedChat.append(previousMessages, [imageMessage]));
-
-      // Placeholder: Handle API call for image upload if necessary
-      // await handleImageUpload(pickerResult.assets[0].uri);
     }
   };
 
   const styles = StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: "#000",
+    },
     container: {
       flex: 1,
       backgroundColor: currentTheme.background,
@@ -126,7 +156,8 @@ export default function Chat() {
     header: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: currentTheme.background,
+      backgroundColor: "rgba(0, 0, 0, 0.4)",
+      // backgroundColor: currentTheme.background,
       padding: 15,
       borderBottomWidth: 1,
       borderBottomColor: "#ddd",
@@ -140,24 +171,59 @@ export default function Chat() {
     headerText: {
       fontSize: 18,
       fontWeight: "bold",
-      color: currentTheme.text,
+      textShadowColor: "rgba(0, 0, 0, 0.7)",
+      color: "#FFF",
     },
     iconButton: {
       padding: 10,
       alignItems: "center",
       justifyContent: "center",
     },
+    inputContainer: {
+      marginHorizontal: 10,
+      marginBottom: 10,
+      borderRadius: 30,
+      borderWidth: 1,
+      borderColor: "#ddd",
+      paddingHorizontal: 15,
+      backgroundColor: "#fff",
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 5,
+      elevation: 3,
+    },
+    sendButton: {
+      marginBottom: 5,
+      backgroundColor: "#007AFF",
+      borderRadius: 20,
+      padding: 10,
+      justifyContent: "center",
+      alignItems: "center",
+      elevation: 2,
+    },
+    sendContainer: {
+      // Override inputContainer styling
+    }
   });
 
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Image source={botAvatar} style={styles.avatar} />
-        <Text style={styles.headerText}>Mabel</Text>
-      </View>
+  return coachBackground ? (
+    <>
+      <StatusBar 
+      translucent
+      backgroundColor="#000" />
+      <SafeAreaView style={styles.safeArea}>
+      <ImageBackground
+        source={coachBackground}
+        style={[styles.container, { paddingBottom: 0 }]}
+        resizeMode="cover"
+      >
+        <View style={styles.header}>
+          <Image source={botAvatar} style={styles.avatar} />
+          <Text style={styles.headerText}>{coachName}</Text>
+        </View>
 
-      {/* Chat */}
       <GiftedChat
         messages={messages}
         onSend={(messages) => handleSend(messages)}
@@ -169,10 +235,10 @@ export default function Chat() {
         showUserAvatar={true}
         renderAvatarOnTop={true}
         isTyping={isStreaming}
-        bottomOffset={50} 
+        bottomOffset={50}
         renderActions={() => (
           <TouchableOpacity style={styles.iconButton} onPress={handleSendImage}>
-            <Ionicons name="image-outline" size={28} color={currentTheme.text} />
+            <Ionicons name="image-outline" size={28} />
           </TouchableOpacity>
         )}
         renderFooter={() =>
@@ -180,7 +246,27 @@ export default function Chat() {
             <ActivityIndicator size="small" color={currentTheme.text} style={{ margin: 10 }} />
           )
         }
+        renderInputToolbar={(props) => (
+          <InputToolbar
+            {...props}
+            containerStyle={styles.inputContainer}
+            
+          />
+        )}
+        renderSend={(props) => (
+          <Send {...props} containerStyle={styles.sendContainer}>
+            <View style={styles.sendButton}>
+              <Ionicons name="send" size={18} color="#fff" />
+            </View>
+          </Send>
+        )}
       />
+    </ImageBackground>
+    </SafeAreaView>
+    </>
+  ) : (
+    <View style={styles.container}>
+      <Text>Loading...</Text>
     </View>
   );
 }
