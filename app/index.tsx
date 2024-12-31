@@ -1,12 +1,29 @@
 import { useRouter } from "expo-router";
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Modal } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from 'expo-status-bar';
+import { getFromSecureStorage } from '../utils/SecureStorage';
 
 export default function Onboarding() {
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    const checkDayAndRedirect = async () => {
+      try {
+        const curDay = await getFromSecureStorage("curDay");
+        // if (curDay) {
+        //   router.push("/(tabs)/chat");
+        // }
+      } catch (error) {
+        console.error("Error checking secure storage:", error);
+      }
+    };
+
+    checkDayAndRedirect();
+  }, [router]);
+  
 
   return (
     <>
@@ -22,7 +39,7 @@ export default function Onboarding() {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push("../onboard/initOnboard_1_day1")}
+            onPress={() => router.push("./onboard/initOnboard_1_day1")}
           >
             <LinearGradient
               colors={["#6A0DAD", "#FF69B4"]}

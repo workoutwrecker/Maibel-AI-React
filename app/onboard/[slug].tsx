@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { View, Text, ImageBackground, TouchableOpacity, StyleSheet, StatusBar } from "react-native";
+import { View, Text, ImageBackground, TouchableOpacity, StyleSheet, BackHandler } from "react-native";
 import { initOnboardStoryData } from "./onboard_data";
 import { useTheme } from '../../context/ThemeContext';
 import { LinearGradient } from "expo-linear-gradient";
+import { useEffect } from "react";
 
 export default function onboardStoryPage() {
   const { slug } = useLocalSearchParams();
@@ -23,9 +24,14 @@ export default function onboardStoryPage() {
     );
   }
 
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true)
+    return () => backHandler.remove()
+  }, [])
+
   return (
     <ImageBackground source={story.image} style={styles().backgroundImage} resizeMode="cover">
-      <StatusBar hidden />
+      {/* <StatusBar translucent /> */}
       <View style={styles().buttonContainer}>
         {story.buttons.map((button, index) => (
           <TouchableOpacity
@@ -66,7 +72,6 @@ const styles = () => {
       backgroundColor: theme === 'light' ? 'white' : 'black',
     },
     backgroundImage: {
-      padding: 25,
       flex: 1,
       justifyContent: "flex-end",
     },

@@ -5,11 +5,13 @@ import { useTheme } from '../../context/ThemeContext';
 import { themeStyles } from "../../context/themeStyles";
 import { StatusBar } from "expo-status-bar";
 
+
 export default function TabLayout() {
   const { theme } = useTheme();
   const currentTheme = themeStyles[theme];
 
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -83,9 +85,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="challenges"
+        name="profile"
         options={{
-          headerTitle: "Challeges",
+          headerTitle: "Profile",
           tabBarLabel: ({ focused }) =>
             focused ? (
               <Text
@@ -95,7 +97,7 @@ export default function TabLayout() {
                   opacity: focused ? 1 : 0,
                 }}
               >
-                Challenges
+                Profile
               </Text>
             ) : null, // Only show label when focused
             tabBarIcon: ({ focused }) => {
@@ -133,5 +135,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    <StatusBar backgroundColor="#000"/>
+    </>
   );
 }

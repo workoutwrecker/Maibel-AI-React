@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { GiftedChat, IMessage, InputToolbar, Send } from "react-native-gifted-chat";
 import { useTheme } from "../../context/ThemeContext";
 import { themeStyles } from "../../context/themeStyles";
-import { View, StyleSheet, Text, Image, TouchableOpacity, ActivityIndicator, ImageBackground, SafeAreaView, StatusBar, KeyboardAvoidingView, Keyboard, 
-  Platform } from "react-native";
+import { View, StyleSheet, Text, Image, TouchableOpacity, ActivityIndicator, ImageBackground, SafeAreaView,
+   KeyboardAvoidingView, Keyboard, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { botResponse } from "./chat/call_bot";
+import { botResponse } from "./call_bot";
 import { getFromSecureStorage } from '../../utils/SecureStorage';
 
 export default function Chat() {
@@ -210,7 +210,6 @@ export default function Chat() {
 
   return coachBackground ? (
     <>
-      <StatusBar translucent={true} backgroundColor="#000" />
       <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         // behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -238,7 +237,7 @@ export default function Chat() {
         showUserAvatar={true}
         renderAvatarOnTop={true}
         isTyping={isStreaming}
-        bottomOffset={0}
+        bottomOffset={50}
         renderActions={() => (
           <TouchableOpacity style={styles.iconButton} onPress={handleSendImage}>
             <Ionicons name="image-outline" size={28} />

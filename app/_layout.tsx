@@ -8,7 +8,6 @@ export default function RootLayout() {
     <ThemeProvider>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false}} />
-        <Stack.Screen name="choose-ai" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="onboard" options={{ headerShown: false }} />
       </Stack>
