@@ -12,10 +12,10 @@ export default function Onboarding() {
   useEffect(() => {
     const checkDayAndRedirect = async () => {
       try {
-        const curDay = await getFromSecureStorage("curDay");
-        // if (curDay) {
-        //   router.push("/(tabs)/chat");
-        // }
+        const onboardDay = await getFromSecureStorage("onboardDay");
+        if (onboardDay) {
+          router.push("/(tabs)/chat");
+        }
       } catch (error) {
         console.error("Error checking secure storage:", error);
       }

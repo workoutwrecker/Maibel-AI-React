@@ -15,7 +15,8 @@ const slides = [
 ];
 
 interface CarouselComponentProps {
-  onCoachSelect: (coachId: string) => void;
+  onCoachSelect: (coachId: string,  selectedGender: string, name: string, 
+    background: string, personalities: string[]) => void;
 }
 
 const CarouselComponent: React.FC<CarouselComponentProps> = ({ onCoachSelect }) => {
@@ -23,16 +24,18 @@ const CarouselComponent: React.FC<CarouselComponentProps> = ({ onCoachSelect }) 
   const progress = useSharedValue<number>(0);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleCoachSelection = (coachId: string) => {
+  const handleCoachSelection = (coachId: string, selectedGender: string, name: string, 
+    background: string, personalities: string[]) => {
     if (coachId === "custom_coach") {
       setModalVisible(true);
     } else {
-      onCoachSelect(coachId);
+      onCoachSelect(coachId, selectedGender, name, background, personalities);
     }
   };
 
-  const handleBuildCoach = (selectedGender: string, systemPrompt: string) => {
-    onCoachSelect("custom_coach");
+  const handleBuildCoach = (selectedGender: string, name: string, 
+    background: string, personalities: string[]) => {
+    onCoachSelect("custom_coach", selectedGender, name, background, personalities);
     setModalVisible(false);
   };
 
@@ -47,7 +50,7 @@ const CarouselComponent: React.FC<CarouselComponentProps> = ({ onCoachSelect }) 
       )}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => handleCoachSelection(item.id)}
+        onPress={() => handleCoachSelection(item.id, "", "", "", [])}
       >
         <LinearGradient colors={["#6A0DAD", "#FF69B4"]} style={styles.gradient}>
           <Text style={styles.buttonText}>Start Your Adventure</Text>

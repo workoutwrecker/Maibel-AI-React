@@ -63,7 +63,7 @@ nemo_nvidia_llm = ChatNVIDIA(model="meta/llama-3.1-70b-instruct", api_key=NVIDIA
 pinecone_vs = VectorStoreManager()
 
 async def call_model(state: MessagesState, config):
-    print("State: ", state)
+    # print("State: ", state)
 
     trimmed_state = trim_messages(state['messages'], strategy="last", token_counter=len, 
                                   max_tokens=21, start_on="human", end_on=("human"), include_system=False) # Gets context of last 21 messages
@@ -72,11 +72,20 @@ async def call_model(state: MessagesState, config):
     retrieved_docs = pinecone_vs.retrieve_from_vector_store(user_input, 1)
     retrieved_context = "\n".join([res.page_content for res in retrieved_docs])   
 
-    personality = config["configurable"].get("personality")
-    personality_data = PERSONALITIES.get(personality, PERSONALITIES["bubbly_coach"])
-    background = personality_data.get("Background", "")
-    system_prompt = f"This is your background: {background}\nUse this as contextual information:\n{retrieved_context}\n"
-    "When communicating with the user, remember to stay in character."
+    personalityId = config["configurable"].get("personalityId")
+    if personalityId == "custom_coach":
+        background = config["configurable"].get("background")
+        personalities = config["configurable"].get("personalities")
+        gender = config["configurable"].get("gender")
+    else:
+        personality_data = PERSONALITIES.get(personalityId, PERSONALITIES["female_coach"])
+        background = personality_data.get("Background", "")
+        personalities = personality_data.get("Short Description", "")
+        name = personality_data.get("Name", "")
+        gender = personality_data.get("Gender", "")
+
+    system_prompt = f"You are {name}({gender})\nThis is your background: {background}\nUse this as contextual information:\n"
+    f"{retrieved_context}\nThese are your personalities: {personalities}\nWhen communicating with the user, remember to stay in character."
 
     messages = [SystemMessage(content=system_prompt)] + trimmed_state
 
@@ -104,8 +113,15 @@ async def chat_endpoint(request: Request):
     data = await request.json()
     user_input = data.get("message", "")
     userid = data.get("userid", "")
-    personality = data.get("personality", "bubbly_coach")
-    print("Personality: ", personality)
+    personalityId = data.get("personalityId", "female_coach")
+    personalities = data.get("personalities", "")
+    gender = data.get("gender", "")
+    background = data.get("background", "")
+
+    print(personalityId)
+    print(gender)
+    print(background)
+    print(personalities)
     
     # Validate input
     if not user_input:
@@ -116,7 +132,8 @@ async def chat_endpoint(request: Request):
     try:
         # Stream the model response back to the client
         async def message_stream():
-            config = {"configurable": {"thread_id": personality, "user_id": userid, "personality": personality}}
+            config = {"configurable": {"thread_id": personalityId, "user_id": userid, "personalityId": personalityId,
+                                       "personalities": personalities, "gender": gender, "background": background}}
             
             messages = {"messages": [HumanMessage(content=user_input)]}
             

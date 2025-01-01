@@ -2,25 +2,36 @@ import React, { useState, useEffect, useCallback } from "react";
 import { GiftedChat, IMessage, InputToolbar, Send } from "react-native-gifted-chat";
 import { useTheme } from "../../context/ThemeContext";
 import { themeStyles } from "../../context/themeStyles";
-import { View, StyleSheet, Text, Image, TouchableOpacity, ActivityIndicator, ImageBackground, SafeAreaView,
+import { View, StyleSheet, Text, Image, TouchableOpacity, ImageBackground, SafeAreaView,
    KeyboardAvoidingView, Keyboard, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { botResponse } from "./call_bot";
 import { getFromSecureStorage } from '../../utils/SecureStorage';
+import { dialogueFlow } from '../onboard/challenges';
 
 export default function Chat() {
   const getCoach = async () => {
-    const coachId = await getFromSecureStorage('selectedCoachId');
-    return { coachId };
+    const coachId = await getFromSecureStorage("coachId");
+    const name = await getFromSecureStorage("name") as string;
+    const coachBackground = await getFromSecureStorage("background");
+    const personality_1 = await getFromSecureStorage("personality_1");
+    const personality_2 = await getFromSecureStorage("personality_2");
+    const personality_3 = await getFromSecureStorage("personality_3");
+    const gender = await getFromSecureStorage("selectedGender");
+    return {
+      coachId,
+      name,
+      coachBackground,
+      personalities: [personality_1, personality_2, personality_3].filter(Boolean),
+      gender,
+    };
   };
-  
-  const logCoachDetails = async () => {
-    const coachDetails = await getCoach();
-    console.log("Coach Details: ", coachDetails);
+
+  const onboardDay = async() => {
+    const onboardDay = await getFromSecureStorage("onboardDay")
+    return (onboardDay)
   };
-  
-  logCoachDetails();
 
   const { theme } = useTheme();
   const currentTheme = themeStyles[theme];
@@ -32,15 +43,23 @@ export default function Chat() {
 
   const botAvatar = require("../../assets/images/Stan.jpeg");
 
+  let coachId: any;
+  let personality: any;
+  let coachBackgroundDesc: any;
+  let gender: any;
+
   useEffect(() => {
     // Get the selected coach and apply the correct background and name
     const setCoachDetails = async () => {
       const coachDetails = await getCoach();
       let background;
-      let name;
-
-      // Define backgrounds and names for different coaches
-      switch (coachDetails.coachId) {
+      let name: string;
+      coachId = coachDetails.coachId
+      name = coachDetails.name
+      personality = coachDetails.personalities
+      gender = coachDetails.gender
+      
+      switch (coachId) {
         case "male_coach":
           background = require("../../assets/images/chat/chat_male.jpg");
           name = "Ethain";
@@ -50,11 +69,10 @@ export default function Chat() {
           name = "Maibel";
           break;
         case "custom_coach":
-          background = require("../../assets/images/onboard/Male_Coach.jpg");
-          name = "Custom Coach";
+          background = require("../../assets/images/onboard/Custom_Coach.jpeg");
           break;
         default:
-          background = require("../../assets/images/onboard/Male_Coach.jpg");
+          background = require("../../assets/images/onboard/Custom_Coach.jpeg");
           name = "Coach";
       }
 
@@ -63,6 +81,42 @@ export default function Chat() {
     };
 
     setCoachDetails();
+
+    const initiateOnboarding = async () => {
+      const storedOnboardDay = await onboardDay();
+      const today = new Date().toISOString().split("T")[0];
+    
+      if (storedOnboardDay === today) {
+        for (const step of dialogueFlow) {
+          const messageText = typeof step.message === "function" ? step.message(coachName) : step.message;
+          setIsStreaming(true);
+          await new Promise((resolve) => setTimeout(resolve, step.time || 1000));
+          setMessages((prevMessages) => [
+            {
+              _id: new Date().getTime(),
+              text: messageText,
+              createdAt: new Date(),
+              user: {
+                _id: 2,
+                name: coachName,
+                avatar: botAvatar,
+              },
+            },
+            ...prevMessages,
+          ]);
+    
+          if (step.next === "wait_for_ready") {
+            setIsStreaming(false);
+            break;
+          }
+          
+        }
+        setIsStreaming(false);
+      }
+    };
+    
+    initiateOnboarding();
+
   }, []);
 
   const handleSend = useCallback((newMessages: IMessage[] = []) => {
@@ -71,7 +125,7 @@ export default function Chat() {
     const userMessage = newMessages[0];
     if (userMessage && userMessage.text) {
       setIsStreaming(true);
-      botResponse(userMessage.text, 123, 'bubbly_coach', (chunk) => {
+      botResponse(userMessage.text, 123, coachId, personality, gender, coachBackgroundDesc, (chunk) => {
         setMessages((prevMessages) => {
           const lastMessage = prevMessages[0];
           if (lastMessage && lastMessage.user._id === 2 && lastMessage.text.startsWith("...")) {
@@ -243,11 +297,6 @@ export default function Chat() {
             <Ionicons name="image-outline" size={28} />
           </TouchableOpacity>
         )}
-        renderFooter={() =>
-          isStreaming && (
-            <ActivityIndicator size="small" color={currentTheme.text} style={{ margin: 10 }} />
-          )
-        }
         renderInputToolbar={(props) => (
           <InputToolbar
             {...props}
