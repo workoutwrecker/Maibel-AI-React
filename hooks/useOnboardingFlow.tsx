@@ -5,7 +5,7 @@ export const initiateOnboardingFlow = async (coachName: string,
     setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>, 
     botAvatar: any, 
     onReadyCallback: () => void,
-    onReplyCallback: () => void,
+    onReplyCallback: (question: string) => Promise<string>,
     setTypingState: (isStreaming: boolean) => void,
     setOnboardingComplete: React.Dispatch<React.SetStateAction<boolean>>,) => {
   setTypingState(true)
@@ -32,7 +32,7 @@ export const initiateOnboardingFlow = async (coachName: string,
     }
     else if (step.next === "wait") {
       setTypingState(false)
-      await onReplyCallback();
+      await onReplyCallback(messageText);
       setTypingState(true)
     }
   }
